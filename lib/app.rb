@@ -24,10 +24,24 @@ class NovoCoffeeApp < Sinatra::Base
   end
 
   get '/my-account' do
-    erb :my_account, locals: {contents: ContentStore.new.all}
+    erb :my_account, locals: {contents: ProductStore.new.all}
   end
 
-  post '/my-account' do
+  post 'my-account' do
+    user = User.new
+    product_store = ProductStore.new
+    if user.valid?(params[:username], params[:password])
+      erb :cart, locals: {products: product_store.all_products}
+      else
+      erb :index
+    end
+  end
+
+  get '/login' do
+    erb :login, locals: {contents: ContentStore.new.all}
+  end
+
+  post '/login' do
     user = User.new
     content_store = ContentStore.new
     if user.valid?(params[:username], params[:password])
@@ -80,6 +94,7 @@ class NovoCoffeeApp < Sinatra::Base
   post '/message' do
     Pony.mail(:to => 'glenegbert1@gmail.com', :from => params[:name], :subject => 'Feedback from ' + params[:name], :body => "#{params[:name]} #{params[:phone]} #{params[:message]}")
     erb :contact_locations, locals: {email: "sent", contents: ContentStore.new.all}
+    redirect '/thankyou'
   end
 
   post '/confirmation' do
